@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xl.dao.SeckillDao">
+
+    <!--mapper作用:为DAO接口方法提供sql语句配置-->
+
+    <update id="reduceNumber">
+        UPDATE
+          seckill
+        SET
+          number = number - 1
+        WHERE seckill_id = #{seckillId}
+            AND #{killTime} >= start_time
+            AND #{killTime} <![CDATA[ <= ]]> end_time
+            AND number > 0
+    </update>
+
+    <!-- resultType可以写包名+类名 由于spring-dao.xml文件开启了包扫描，也可以直接写类名 -->
+    <!--<select id="queryById" resultType="com.xl.entity.Seckill">-->
+    <select id="getSeckillById" resultType="Seckill" parameterType="long">
+      SELECT
+          seckill_id,
+          NAME,
+          number,
+          start_time,
+          end_time,
+          create_time FROM seckill
+      WHERE seckill_id = #{seckillId}
+    </select>
+
+    <!-- 此处的resultType指的是返回集合中泛型的类型，此处可以不写参数类型 -->
+    <!--<select id="queryAll" resultType="com.xl.entity.Seckill" parameterType="int">-->
+    <select id="listAllSeckill" resultType="Seckill" >
+    SELECT
+      seckill_id,
+      NAME,
+      number,
+      start_time,
+      end_time,
+      create_time
+    FROM
+      seckill
+    LIMIT #{offset}, #{limit}
+    </select>
+
+</mapper>
