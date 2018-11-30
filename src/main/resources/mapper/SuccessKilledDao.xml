@@ -9,9 +9,10 @@
         <!-- 忽略主键冲突 -->
         INSERT ignore INTO success_killed (
             seckill_id,
-            user_phone )
+            user_phone,
+            state)
         VALUES
-            (#{seckillId}, ${userPhone});
+            (#{seckillId}, ${userPhone}, 1)
     </insert>
 
     <select id="getSeckillByIdUserphone" parameterType="long" resultType="SuccessKilled">
