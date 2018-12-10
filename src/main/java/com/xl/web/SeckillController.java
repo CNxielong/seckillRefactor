@@ -79,7 +79,7 @@ public class SeckillController {
     }
 
 
-    @RequestMapping(value = "/{userPhone}/{md5}/execution", method = RequestMethod.POST)
+    @RequestMapping(value = "/{seckillId}/{md5}/execution", method = RequestMethod.POST)
     @ResponseBody
     public SeckillResult<SeckillExecution> execute(@PathVariable("seckillId") long seckillId,
             @PathVariable("md5") String md5, @CookieValue(value = "killPhone", required = false) Long userPhone) {
@@ -87,17 +87,19 @@ public class SeckillController {
         if( null == userPhone){ // 取不到电话号码
          return new SeckillResult<>(false, "电话号码不能为空");
         }else{
-            SeckillExecution seckillExecution;
-            try {
-                 seckillExecution = seckillService.executeSeckill(seckillId, userPhone, md5);
+             try {
+               SeckillExecution seckillExecution = seckillService.executeSeckill(seckillId, userPhone, md5);
                 return new SeckillResult<SeckillExecution>(true, seckillExecution);
             } catch (RepeatKillException e) {
-                return new SeckillResult<SeckillExecution>(true, SeckillStatEnum.REPEAT_KILL.getStateInfo());
+                SeckillExecution seckillExecution = new SeckillExecution(seckillId, SeckillStatEnum.REPEAT_KILL);
+                return new SeckillResult<SeckillExecution>(true, seckillExecution);
             } catch (SeckillCloseException e) {
-                return new SeckillResult<SeckillExecution>(true, SeckillStatEnum.TIME_ERROR.getStateInfo());
+                SeckillExecution seckillExecution = new SeckillExecution(seckillId, SeckillStatEnum.TIME_ERROR);
+                return new SeckillResult<SeckillExecution>(true, seckillExecution);
             } catch (SeckillException e) {
+                 SeckillExecution seckillExecution = new SeckillExecution(seckillId, SeckillStatEnum.INNER_ERROR);
                 logger.info(SeckillStatEnum.INNER_ERROR.getStateInfo(), e);
-                return new SeckillResult<SeckillExecution>(true, SeckillStatEnum.INNER_ERROR.getStateInfo());
+                return new SeckillResult<SeckillExecution>(false,seckillExecution);
             }
 
         }

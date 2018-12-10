@@ -1,6 +1,7 @@
 package com.xl.dto;
 
 import com.xl.entity.SuccessKilled;
+import com.xl.enums.SeckillStatEnum;
 
 /**
  * （Data Transfer Object） ：数据传输对象， Service 或 Manager 向外传输的对象
@@ -22,6 +23,13 @@ public class SeckillExecution {
 
     //秒杀成功结果返回信息
     private SuccessKilled successKilled;
+
+    //用枚举类做构造方法
+    public SeckillExecution(long seckillId, SeckillStatEnum seckillStatEnum){
+        this.seckillId = seckillId;
+        this.state = seckillStatEnum.getState();
+        this.stateInfo = seckillStatEnum.getStateInfo();
+    }
 
     //成功状态
     public SeckillExecution(long seckillId, int state, String stateInfo, SuccessKilled successKilled) {
