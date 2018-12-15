@@ -2,6 +2,7 @@ package com.xl.service.impl;
 
 import com.xl.dao.SeckillDao;
 import com.xl.dao.SuccessKilledDao;
+import com.xl.dao.cache.RedisDao;
 import com.xl.dto.Exposer;
 import com.xl.dto.SeckillExecution;
 import com.xl.entity.Seckill;
@@ -39,6 +40,9 @@ public class SeckillServiceImpl implements SeckillService {
     private SeckillDao seckillDao;
 
     @Autowired
+    private RedisDao redisDao;
+
+    @Autowired
     private SuccessKilledDao successKilledDao;
 
     @Override
@@ -55,19 +59,25 @@ public class SeckillServiceImpl implements SeckillService {
 
     /*
      * @Auther: XDragon
-     * @Description: 暴露秒杀接口
-     * @Date: 2018/11/30 12:44 
+     * @Description: 暴露秒杀接口 Redis优化版本
+     * @Date: 2018/11/30 12:44
      * @Param [seckillId]
      * @Return com.xl.dto.Exposer
-     * @Exception 
+     * @Exception
      */
     @Override
     public Exposer exportSeckillUrl(long seckillId) {
         // 根据Id获取秒杀信息
-        Seckill seckill = seckillDao.getSeckillById(seckillId);
+        Seckill seckill = redisDao.getSeckill(seckillId);
         // 判断是否为空
         if (null == seckill) { // 如果没找到
-            return new Exposer(false, seckillId);
+             seckill = seckillDao.getSeckillById(seckillId);
+            if( null == seckill){
+                return new Exposer(false, seckillId);
+            }else{
+                // 3 放入Redis
+                redisDao.setSeckill(seckill);
+            }
         }
         // 判断当前时间 和开始时间 结束时间
         Date now = new Date();
@@ -130,5 +140,33 @@ public class SeckillServiceImpl implements SeckillService {
         }
     }
 
+    /*
+     * @Auther: XDragon
+     * @Description: 暴露秒杀接口 没有Redis版本
+     * @Date: 2018/11/30 12:44
+     * @Param [seckillId]
+     * @Return com.xl.dto.Exposer
+     * @Exception
+     */
+//    @Override
+//    public Exposer exportSeckillUrl(long seckillId) {
+//        // 根据Id获取秒杀信息
+//        Seckill seckill = seckillDao.getSeckillById(seckillId);
+//        // 判断是否为空
+//        if (null == seckill) { // 如果没找到
+//            return new Exposer(false, seckillId);
+//        }
+//        // 判断当前时间 和开始时间 结束时间
+//        Date now = new Date();
+//        Date startTime = seckill.getStartTime();
+//        Date endTime = seckill.getEndTime();
+//        if (now.before(startTime) || now.after(endTime)) {// 如果现在还没开始
+//            return new Exposer(false, seckillId, now.getTime(), startTime.getTime(), endTime.getTime());
+//        } else { // 查询到秒杀信息并在秒杀时间段内
+//            String stringId = Long.toString(seckill.getseckillId());
+//            String md5 = Md5Utils.encrypt(stringId);
+//            return new Exposer(true, md5, seckillId);
+//        }
+//    }
 
 }
