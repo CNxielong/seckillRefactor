@@ -88,7 +88,8 @@ public class SeckillController {
          return new SeckillResult<>(false, "电话号码不能为空");
         }else{
              try {
-               SeckillExecution seckillExecution = seckillService.executeSeckill(seckillId, userPhone, md5);
+//               SeckillExecution seckillExecution = seckillService.executeSeckill(seckillId, userPhone, md5);//原始未优化
+                 SeckillExecution seckillExecution = seckillService.executeSeckillByProducer(seckillId, userPhone, md5); // 通过存储过程执行秒杀
                 return new SeckillResult<SeckillExecution>(true, seckillExecution);
             } catch (RepeatKillException e) {
                 SeckillExecution seckillExecution = new SeckillExecution(seckillId, SeckillStatEnum.REPEAT_KILL);

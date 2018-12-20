@@ -59,4 +59,15 @@ public interface SeckillService {
      */
     SeckillExecution executeSeckill(long seckillId, long userPhone, String md5)
             throws SeckillException, RepeatKillException, SeckillCloseException;
+
+    /*
+     * @Auther: XDragon
+     * @Description:执行秒杀操作存储过程优化
+     * @Date: 2018/12/20 22:43
+     * @Param [seckillId, userPhone, md5]
+     * @Return com.xl.dto.SeckillExecution
+     * @Exception
+     */
+    SeckillExecution executeSeckillByProducer(long seckillId, long userPhone, String md5)
+            throws SeckillException, RepeatKillException, SeckillCloseException;
 }

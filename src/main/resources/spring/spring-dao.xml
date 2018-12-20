@@ -49,5 +49,10 @@
         <property name="basePackage" value="com.xl.dao" />
     </bean>
 
+    <!-- 5:注入RedisDao -->
+    <bean id="redisDao" class="com.xl.dao.cache.RedisDao">
+        <constructor-arg index="0" value="localhost"></constructor-arg>
+        <constructor-arg index="1" value="6379"></constructor-arg>
+    </bean>
 
 </beans>

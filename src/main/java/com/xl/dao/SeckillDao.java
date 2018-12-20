@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Auther: XDragon
@@ -42,4 +43,10 @@ public interface SeckillDao {
      * @Exception
      */
     List<Seckill> listAllSeckill(@Param(value = "offset") int offset, @Param(value = "limit") int limit);
+
+    /**
+     * 使用存储过程执行秒杀
+     * @param paramMap
+     */
+    void killByProcedure(Map<String,Object> paramMap);
 }

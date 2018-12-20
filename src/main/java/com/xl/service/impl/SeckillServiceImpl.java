@@ -13,6 +13,7 @@ import com.xl.exception.SeckillCloseException;
 import com.xl.exception.SeckillException;
 import com.xl.service.SeckillService;
 import com.xl.util.Md5Utils;
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -137,6 +139,37 @@ public class SeckillServiceImpl implements SeckillService {
         } catch (SeckillException e) {
             logger.error("秒杀系统内部错误", e.getMessage());
             throw  new SeckillException("seckill inner error: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public SeckillExecution executeSeckillByProducer(long seckillId, long userPhone, String md5) throws SeckillException, RepeatKillException, SeckillCloseException {
+        if (null == md5 || !md5.equals(Md5Utils.encrypt(Long.toString(seckillId)))) {
+            throw new SeckillException(SeckillStatEnum.INNER_ERROR.getStateInfo());
+        }
+        // 当前系统时间
+        Date killTime = new Date();
+        // 封装参数
+        HashMap<String,Object> map = new HashMap<String, Object>();
+        map.put("seckillId", seckillId);
+        map.put("phone", userPhone);
+        map.put("killTime", killTime);
+        map.put("result", null);// 输出参数 用out
+
+        try {
+            // 调用存储过程秒杀 result被赋值
+            seckillDao.killByProcedure(map);
+            // 获取result
+            int result = MapUtils.getInteger(map, "result", -2);
+            if( result == 1 ){
+                SuccessKilled successKilled = successKilledDao.getSeckillByIdUserphone(seckillId, userPhone);
+                return new SeckillExecution(seckillId,SeckillStatEnum.SUCCESS.getState(),SeckillStatEnum.SUCCESS.getStateInfo(),successKilled);
+            }else {
+                return new SeckillExecution(seckillId, SeckillStatEnum.stateOf(result));
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return new SeckillExecution(seckillId, SeckillStatEnum.INNER_ERROR);
         }
     }
 
